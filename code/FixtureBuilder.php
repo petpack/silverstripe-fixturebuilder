@@ -81,13 +81,13 @@ class FixtureBuilder extends Controller {
 	 */
 	private function connect($host,$user,$pass,$db) {
 		// Open database connection
-		$this->conn = mysql_connect($host, $user, $pass);
+		$this->conn = mysqli_connect($host, $user, $pass);
 		if (!$this->conn) {
-			die("Could not connect to DB [{$user}@{$host}] :: " . mysql_error() . "\n");
+			die("Could not connect to DB [{$user}@{$host}] :: " . mysqli_error() . "\n");
 		}
 		
 		// Select the database
-		if (!mysql_select_db($db))
+		if (!mysqli_select_db($db))
 			die("Count not connect to the '{$db}' database!");
 		
 		return true;
@@ -95,16 +95,16 @@ class FixtureBuilder extends Controller {
 	
 	/**
 	 * Return a dataobjectset containing all tables in the database 
-	 * @return boolean|DataObjectSet
+	 * @return SS_Boolean|DataObjectSet
 	 */
 	function list_tables() {
 		if (!$this->conn) return false;
 		
-		$result = mysql_query('SHOW TABLES', $this->conn);
+		$result = mysqli_query('SHOW TABLES', $this->conn);
 		
 		$ret = new DataObjectSet();
 		if ($result)
-			while ($row = mysql_fetch_row($result)) {
+			while ($row = mysqli_fetch_row($result)) {
 				$table = $row[0];
 				$o = new DataObject;
 				$o->table = $table;
@@ -119,9 +119,9 @@ class FixtureBuilder extends Controller {
 	
 	function count_records($table) {
 		$ret = 0;
-		$result = mysql_query("SELECT COUNT(*) FROM $table",$this->conn);
+		$result = mysqli_query("SELECT COUNT(*) FROM $table",$this->conn);
 		if ($result) {
-			$row = mysql_fetch_row($result);
+			$row = mysqli_fetch_row($result);
 			$ret = $row[0];	
 		}
 		return $ret;
@@ -184,7 +184,7 @@ class FixtureBuilder extends Controller {
 	
 	private function table_to_yaml($table,$all = true) {
 		$sql = "SELECT * from $table";
-		$result = mysql_query($sql, $this->conn);
+		$result = mysqli_query($sql, $this->conn);
 		
 		$yaml = '';
 		
@@ -192,7 +192,7 @@ class FixtureBuilder extends Controller {
 			//table header:
 			$yaml = "\n$table:\n";
 			//iterate over records: 
-			while ($row = mysql_fetch_assoc($result)) {
+			while ($row = mysqli_fetch_assoc($result)) {
 				if (isset($row['ClassName']) && isset($row['ID']))
 					$identifier = $row['ClassName'] . $row['ID'] . ":";
 				else
